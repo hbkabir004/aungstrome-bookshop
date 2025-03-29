@@ -1,9 +1,58 @@
-import { useState } from "react"
-import { FaBars, FaBook, FaHeart, FaTimes } from "react-icons/fa"
+"use client"
+
+import { useEffect, useState } from "react"
+import { FaBars, FaBook, FaHeart, FaMoon, FaSun, FaTimes } from "react-icons/fa"
 import { Link } from "react-router-dom"
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const [isDark, setIsDark] = useState(() => {
+        // Check localStorage first, then fallback to class check
+        if (typeof window !== "undefined") {
+            const savedTheme = localStorage.getItem("theme")
+            if (savedTheme) {
+                return savedTheme === "dark"
+            }
+            return document.documentElement.classList.contains("dark")
+        }
+        return false
+    })
+
+    // Apply theme when component mounts and when isDark changes
+    useEffect(() => {
+        if (isDark) {
+            document.documentElement.classList.add("dark")
+            localStorage.setItem("theme", "dark")
+        } else {
+            document.documentElement.classList.remove("dark")
+            localStorage.setItem("theme", "light")
+        }
+    }, [isDark])
+
+    // Check for system preference changes
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+
+        // Only apply system preference if user hasn't explicitly chosen a theme
+        const handleChange = (e) => {
+            const hasUserPreference = localStorage.getItem("theme")
+            if (!hasUserPreference) {
+                setIsDark(e.matches)
+            }
+        }
+
+        // Set initial value based on system preference if no user preference
+        if (!localStorage.getItem("theme")) {
+            setIsDark(mediaQuery.matches)
+        }
+
+        mediaQuery.addEventListener("change", handleChange)
+        return () => mediaQuery.removeEventListener("change", handleChange)
+    }, [])
+
+    const toggleTheme = () => {
+        setIsDark(!isDark)
+    }
 
     return (
         <nav className="bg-background border-b border-border shadow-sm">
@@ -28,6 +77,13 @@ function Navbar() {
                             <FaHeart className="text-red-500" />
                             <span>Wishlist</span>
                         </Link>
+                        <button
+                            onClick={toggleTheme}
+                            className="p-2 rounded-full hover:bg-accent/70 transition-colors"
+                            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                        >
+                            {isDark ? <FaSun className="text-yellow-300" /> : <FaMoon />}
+                        </button>
                     </div>
 
                     {/* Mobile menu */}
@@ -45,6 +101,13 @@ function Navbar() {
                                     <FaHeart className="text-red-500" />
                                     <span>Wishlist</span>
                                 </Link>
+                                <button
+                                    onClick={toggleTheme}
+                                    className="flex items-center space-x-1 hover:text-primary transition-colors"
+                                >
+                                    {isDark ? <FaSun className="mr-2 text-yellow-300" /> : <FaMoon className="mr-2" />}
+                                    <span>{isDark ? "Light Mode" : "Dark Mode"}</span>
+                                </button>
                             </div>
                         </div>
                     )}
