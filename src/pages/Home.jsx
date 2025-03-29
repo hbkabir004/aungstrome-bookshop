@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import BookList from '../components/BookList';
 import Pagination from '../components/Pagination';
+import useLocalStorage from '../hooks/useLocalStorage';
 
 const Home = () => {
     const [books, setBooks] = useState([]);
@@ -8,7 +9,9 @@ const Home = () => {
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
+    const [wishlist, setWishlist] = useLocalStorage('wishlist', []);
 
+    // Fetching Books from Backend
     useEffect(() => {
         const fetchBooks = async () => {
             try {
@@ -29,6 +32,17 @@ const Home = () => {
         fetchBooks();
     }, [currentPage]);
 
+    // To select books as Wishlist
+    const toggleWishlist = useCallback((book) => {
+        setWishlist(prev => {
+            const isBookWishlisted = prev.some(b => b.id === book.id);
+            if (isBookWishlisted) {
+                return prev.filter(b => b.id !== book.id);
+            }
+            return [...prev, book];
+        });
+    }, [setWishlist]);
+
     if (loading) return <div className="text-center">Loading...</div>;
     if (error) return <div className="text-red-500 text-center">{error}</div>;
 
@@ -36,6 +50,8 @@ const Home = () => {
         <div className="space-y-6">
             <BookList
                 books={books}
+                wishlist={wishlist}
+                onToggleWishlist={toggleWishlist}
             />
 
             <Pagination
