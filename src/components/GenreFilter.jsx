@@ -5,7 +5,7 @@ const GenreFilter = memo(({ value, onChange, genres }) => {
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="p-2 border rounded bg-background text-foreground border-input max-w-full"
+      className="p-2 border border-blue-300 rounded bg-background text-foreground border-input max-w-full"
     >
       <option value="">All Genres</option>
       {genres.map(genre => (

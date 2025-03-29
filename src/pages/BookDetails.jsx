@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { FaArrowLeft, FaHeart, FaRegHeart } from "react-icons/fa"
 import { Link, useParams } from "react-router-dom"
+import Loading from "../components/Loading"
 import useLocalStorage from "../hooks/useLocalStorage"
 
 function BookDetails() {
@@ -40,7 +41,7 @@ function BookDetails() {
     })
   }
 
-  if (loading) return <div className="text-center py-12">Loading...</div>
+  if (loading) return <Loading />;
   if (error) return <div className="text-red-500 text-center py-12">{error}</div>
   if (!book) return <div className="text-center py-12">Book not found</div>
 
