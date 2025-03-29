@@ -1,17 +1,39 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import BookList from '../components/BookList';
+import GenreFilter from '../components/GenreFilter';
 import Pagination from '../components/Pagination';
+import SearchBar from '../components/SearchBar';
 import useLocalStorage from '../hooks/useLocalStorage';
 
-const Home = () => {
+function Home() {
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedGenre, setSelectedGenre] = useState('');
     const [wishlist, setWishlist] = useLocalStorage('wishlist', []);
+    const [preferences, setPreferences] = useLocalStorage('preferences', {
+        searchTerm: '',
+        selectedGenre: '',
+        currentPage: 1
+    });
 
-    // Fetching Books from Backend
+    useEffect(() => {
+        setSearchTerm(preferences.searchTerm);
+        setSelectedGenre(preferences.selectedGenre);
+        setCurrentPage(preferences.currentPage);
+    }, [preferences.currentPage, preferences.searchTerm, preferences.selectedGenre]);
+
+    useEffect(() => {
+        setPreferences({
+            searchTerm,
+            selectedGenre,
+            currentPage
+        });
+    }, [searchTerm, selectedGenre, currentPage, setPreferences]);
+
     useEffect(() => {
         const fetchBooks = async () => {
             try {
@@ -32,7 +54,6 @@ const Home = () => {
         fetchBooks();
     }, [currentPage]);
 
-    // To select books as Wishlist
     const toggleWishlist = useCallback((book) => {
         setWishlist(prev => {
             const isBookWishlisted = prev.some(b => b.id === book.id);
@@ -43,13 +64,34 @@ const Home = () => {
         });
     }, [setWishlist]);
 
+    const genres = useMemo(() =>
+        [...new Set(books.flatMap(book => book.subjects))],
+        [books]
+    );
+
+    const filteredBooks = useMemo(() =>
+        books.filter(book => {
+            const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesGenre = !selectedGenre || book.subjects.some(subject =>
+                subject.toLowerCase().includes(selectedGenre.toLowerCase())
+            );
+            return matchesSearch && matchesGenre;
+        }),
+        [books, searchTerm, selectedGenre]
+    );
+
     if (loading) return <div className="text-center">Loading...</div>;
     if (error) return <div className="text-red-500 text-center">{error}</div>;
 
     return (
         <div className="space-y-6">
+            <div className="flex flex-col md:flex-row gap-4">
+                <SearchBar value={searchTerm} onChange={setSearchTerm} />
+                <GenreFilter value={selectedGenre} onChange={setSelectedGenre} genres={genres} />
+            </div>
+
             <BookList
-                books={books}
+                books={filteredBooks}
                 wishlist={wishlist}
                 onToggleWishlist={toggleWishlist}
             />
@@ -61,6 +103,6 @@ const Home = () => {
             />
         </div>
     );
-};
+}
 
 export default Home;

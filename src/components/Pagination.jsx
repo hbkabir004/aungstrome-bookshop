@@ -77,7 +77,7 @@ const Pagination = memo(({ currentPage, totalPages, onPageChange }) => {
       >
         <FaChevronLeft />
       </button>
-      
+
       <div className="flex gap-1">
         {renderPaginationButtons()}
       </div>
