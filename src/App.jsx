@@ -1,10 +1,11 @@
-import { useEffect } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Home from "./pages/Home";
-import Wishlist from "./pages/Wishlist";
+import { useEffect } from "react"
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
+import Navbar from "./components/Navbar"
+import BookDetails from "./pages/BookDetails"
+import Home from "./pages/Home"
+import Wishlist from "./pages/Wishlist"
 
-export default function App() {
+function App() {
   // Apply theme from localStorage on initial load
   useEffect(() => {
     // Check for saved theme preference or use system preference
@@ -24,16 +25,20 @@ export default function App() {
   }, [])
 
   return (
-    <BrowserRouter>
+    <Router>
       <div className="min-h-screen bg-background text-foreground transition-colors duration-200">
         <Navbar />
         <main className="container mx-auto px-4 py-8">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/book/:id" element={<BookDetails />} />
           </Routes>
         </main>
       </div>
-    </BrowserRouter>
+    </Router>
   )
 }
+
+export default App
+
