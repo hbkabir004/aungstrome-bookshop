@@ -90,17 +90,23 @@ function Home() {
                 <GenreFilter value={selectedGenre} onChange={setSelectedGenre} genres={genres} />
             </div>
 
-            <BookList
-                books={filteredBooks}
-                wishlist={wishlist}
-                onToggleWishlist={toggleWishlist}
-            />
+            {filteredBooks.length === 0 ? (
+                <div className="text-center text-gray-500">No books found</div>
+            ) : (
+                <BookList
+                    books={filteredBooks}
+                    wishlist={wishlist}
+                    onToggleWishlist={toggleWishlist}
+                />
+            )}
 
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-            />
+            {!searchTerm && !selectedGenre && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
+            )}
         </div>
     );
 }
